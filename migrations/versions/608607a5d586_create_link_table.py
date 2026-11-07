@@ -7,6 +7,7 @@ Create Date: 2026-11-08 00:21:09.490184
 """
 from typing import Sequence, Union
 
+import sqlmodel.sql.sqltypes
 from alembic import op
 import sqlalchemy as sa
 import sqlmodel
@@ -27,7 +28,7 @@ def upgrade() -> None:
     sa.Column('short_code', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('original_url', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('clicks', sa.Integer(), nullable=False),
-    sa.Column('created_at', sqlmodel.sql.sqltypes.UTCDateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('short_code')
     )
