@@ -116,27 +116,27 @@ def test_redirect_nonexistent_link(client):
     assert response.json() == {"detail": "Link not found"}
 
 
-def test_delete_link(client):
+def test_delete_link(client, admin_headers):
     created = client.post("/links", json={"original_url": "https://example.com/"})
     short_code = created.json()["short_code"]
 
-    response = client.delete(f"/links/{short_code}")
+    response = client.delete(f"/links/{short_code}", headers=admin_headers)
     assert response.status_code == 204
 
     assert client.get(f"/links/{short_code}").status_code == 404
 
 
-def test_delete_nonexistent_link(client):
-    response = client.delete("/links/absent")
+def test_delete_nonexistent_link(client, admin_headers):
+    response = client.delete("/links/absent", headers=admin_headers)
 
     assert response.status_code == 404
 
 
-def test_get_links(client):
+def test_get_links(client, admin_headers):
     client.post("/links", json={"original_url": "https://example.com/"})
     client.post("/links", json={"original_url": "https://example.org/"})
 
-    response = client.get("/links")
+    response = client.get("/links", headers=admin_headers)
 
     assert response.status_code == 200
     assert len(response.json()) == 2
@@ -162,30 +162,30 @@ def test_create_link_returns_short_url(client, monkeypatch):
     assert isinstance(data["id"], int)
     assert "created_at" in data
 
-def test_get_links_pagination(client):
+def test_get_links_pagination(client, admin_headers):
     for i in range(3):
         client.post("/links", json={"original_url": f"https://example.com/{i}"})
 
-    first_page = client.get("/links", params={"limit": 2})
-    second_page = client.get("/links", params={"limit": 2, "offset": 2})
+    first_page = client.get("/links", params={"limit": 2}, headers=admin_headers)
+    second_page = client.get("/links", params={"limit": 2, "offset": 2}, headers=admin_headers)
 
     assert len(first_page.json()) == 2
     assert len(second_page.json()) == 1
 
 
-def test_get_links_newest_first(client):
+def test_get_links_newest_first(client, admin_headers):
     client.post("/links", json={"original_url": "https://example.com/old"})
     client.post("/links", json={"original_url": "https://example.com/new"})
 
-    links = client.get("/links").json()
+    links = client.get("/links", headers=admin_headers).json()
 
     assert links[0]["original_url"] == "https://example.com/new"
 
 
-def test_get_links_invalid_pagination(client):
-    assert client.get("/links", params={"limit": 0}).status_code == 422
-    assert client.get("/links", params={"limit": 1000}).status_code == 422
-    assert client.get("/links", params={"offset": -1}).status_code == 422
+def test_get_links_invalid_pagination(client, admin_headers):
+    assert client.get("/links", params={"limit": 0}, headers=admin_headers).status_code == 422
+    assert client.get("/links", params={"limit": 1000}, headers=admin_headers).status_code == 422
+    assert client.get("/links", params={"offset": -1}, headers=admin_headers).status_code == 422
 
 def test_create_link_too_long_url(client):
     long_url = "https://example.com/" + "a" * 3000

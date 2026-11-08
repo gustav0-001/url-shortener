@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.database import get_session
+from app.config import settings
 
 from app.models import Link
 
@@ -40,3 +41,8 @@ def client_fixture(session):
     finally:
         client.close()
         app.dependency_overrides.pop(get_session, None)
+
+@pytest.fixture(name="admin_headers")
+def admin_headers_fixture(monkeypatch):
+    monkeypatch.setattr(settings, "admin_token", "test-admin-token")
+    return {"Authorization": "Bearer test-admin-token"}
