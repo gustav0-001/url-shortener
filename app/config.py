@@ -4,6 +4,7 @@ from pydantic import field_validator
 class Settings(BaseSettings):
     base_url: str = "http://localhost:8000"
     database_url: str = "sqlite:///links.db"
+    admin_token: str = ""
 
     model_config = SettingsConfigDict(env_file=".env")
 

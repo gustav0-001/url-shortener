@@ -7,6 +7,9 @@ from app.models import Link
 from app.schemas import LinkCreate, LinkResponse
 from app.services import links as link_service
 
+from app.security import require_admin
+
+
 router = APIRouter(
     tags=["Links"],
 )
@@ -33,7 +36,7 @@ def create_link(payload: LinkCreate, session: Session = Depends(get_session)):
         )
 
 
-@router.get("/links", response_model=list[LinkResponse])
+@router.get("/links", response_model=list[LinkResponse], dependencies=[Depends(require_admin)])
 def get_links(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -69,7 +72,7 @@ def get_link(short_code: str, session: Session = Depends(get_session)):
     return get_link_or_404(session, short_code)
 
 
-@router.delete("/links/{short_code}", status_code=204)
+@router.delete("/links/{short_code}", status_code=204, dependencies=[Depends(require_admin)])
 def delete_link(short_code: str, session: Session = Depends(get_session)):
     """
     Удалить ссылку (запись из БД) по short_code
