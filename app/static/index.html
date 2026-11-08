@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHORTLINK — сократитель ссылок</title>
+<meta name="description" content="Вставь длинную ссылку и получи короткую. Счётчик переходов, FastAPI и PostgreSQL.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FFE14D'/%3E%3Cpath d='M8 16h16' stroke='%23111' stroke-width='5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="page">
+<header>
+<b class="logo">[SHORTLINK]</b>
+<nav><a href="#how">как это работает</a><a href="/docs">api</a><a href="https://github.com/gustav0-001/url-shortener">github</a></nav>
+</header>
+<main>
+<h1>Длинную —<br>в короткую.</h1>
+<form id="form">
+<label for="url" class="sr">Длинная ссылка</label>
+<input id="url" name="url" type="text" inputmode="url" placeholder="https://очень-длинный-адрес.com/…" autocomplete="off" required>
+<button id="submit" type="submit">СОКРАТИТЬ</button>
+</form>
+<p id="message" class="message" role="alert" hidden></p>
+<div id="result" class="card" hidden>
+<a id="short" href="#" target="_blank" rel="noopener"></a>
+<button id="copy" type="button">КОПИРОВАТЬ</button>
+</div>
+<section aria-labelledby="mine">
+<h2 id="mine">Мои ссылки</h2>
+<ul id="list" class="list"></ul>
+<p id="empty" class="muted">Пока пусто. Сократи первую ссылку.</p>
+</section>
+<section id="how" aria-labelledby="how-title">
+<h2 id="how-title">Как это работает</h2>
+<ol class="steps"><li>Вставь длинный адрес.</li><li>Получи короткую ссылку.</li><li>Делись ей: каждый переход считается.</li></ol>
+</section>
+</main>
+<footer>FastAPI · PostgreSQL · Docker</footer>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

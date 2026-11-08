@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 
 from app.models import Link
 
-RESERVED_CODES = {"health", "links", "docs", "redoc"}
+RESERVED_CODES = {"health", "links", "docs", "redoc", "static"}
 MAX_ATTEMPTS = 10
 
 
