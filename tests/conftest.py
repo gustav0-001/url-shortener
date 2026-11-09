@@ -7,6 +7,8 @@ from app.main import app
 from app.database import get_session
 from app.config import settings
 
+from app import ratelimit
+
 from app.models import Link
 
 
@@ -46,3 +48,9 @@ def client_fixture(session):
 def admin_headers_fixture(monkeypatch):
     monkeypatch.setattr(settings, "admin_token", "test-admin-token")
     return {"Authorization": "Bearer test-admin-token"}
+
+@pytest.fixture(autouse=True)
+def reset_rate_limit():
+    ratelimit.reset()
+    yield
+
