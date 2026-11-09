@@ -1,4 +1,6 @@
 import time
+import hashlib
+import logging
 from collections import defaultdict, deque
 from threading import Lock
 
@@ -6,9 +8,15 @@ from fastapi import HTTPException, Request
 
 from app.config import settings
 
+
+logger = logging.getLogger(__name__)
+
 _hits: dict[str, deque[float]] = defaultdict(deque)
 _lock = Lock()
 _MAX_TRACKED_CLIENTS = 10_000
+
+def _client_tag(ip: str) -> str:
+    return hashlib.sha256(ip.encode()).hexdigest()[:8]
 
 def reset() -> None:
     with _lock:
@@ -48,6 +56,7 @@ def rate_limit_create(request: Request) -> None:
 
         if len(hits) >= limit:
             retry_after = int(window - (now - hits[0])) + 1
+            logger.warning("rate limit exceeded client=%s", _client_tag(ip))
             raise HTTPException(
                 status_code=429,
                 detail="Too many requests. Try again later",

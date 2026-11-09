@@ -1,11 +1,14 @@
 import secrets
 import string
+import logging
 
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from app.models import Link
+
+logger = logging.getLogger(__name__)
 
 RESERVED_CODES = {"health", "links", "docs", "redoc", "static"}
 MAX_ATTEMPTS = 10
@@ -42,11 +45,14 @@ def create_link(session: Session, original_url: str) -> Link:
             session.commit()
         except IntegrityError:
             session.rollback()
+            logger.warning("Short code collision, retrying")
             continue
 
         session.refresh(link)
+        logger.info("Link created code=%s", link.short_code)
         return link
 
+    logger.error("Could not generate a unique short code in %s attempts", MAX_ATTEMPTS)
     raise ShortCodeGenerationError
 
 

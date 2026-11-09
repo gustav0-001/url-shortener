@@ -1,10 +1,13 @@
 import secrets
+import logging
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
 
+
+logger = logging.getLogger(__name__)
 
 bearer = HTTPBearer(auto_error=False)
 
@@ -24,6 +27,7 @@ def require_admin(
             credentials.credentials.encode(), token.encode()
         )
     ):
+        logger.warning("admin authentication failed")
         raise HTTPException(
             status_code=401,
             detail="Admin token required",

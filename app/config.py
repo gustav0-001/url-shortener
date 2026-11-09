@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     admin_token: str = ""
     create_rate_limit: int = 10
     create_rate_window: int = 60
+    log_level: str = "INFO"
 
     model_config = SettingsConfigDict(env_file=".env")
 
