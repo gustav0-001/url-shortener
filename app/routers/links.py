@@ -8,6 +8,7 @@ from app.schemas import LinkCreate, LinkResponse
 from app.services import links as link_service
 
 from app.security import require_admin
+from app.ratelimit import rate_limit_create
 
 
 router = APIRouter(
@@ -22,7 +23,7 @@ def get_link_or_404(session: Session, short_code: str) -> Link:
     return link
 
 
-@router.post("/links", response_model=LinkResponse, status_code=201)
+@router.post("/links", response_model=LinkResponse, status_code=201, dependencies=[Depends(rate_limit_create)])
 def create_link(payload: LinkCreate, session: Session = Depends(get_session)):
     """
     Создание ссылки с проверкой повторной генерации short_code

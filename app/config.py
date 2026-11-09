@@ -5,6 +5,8 @@ class Settings(BaseSettings):
     base_url: str = "http://localhost:8000"
     database_url: str = "sqlite:///links.db"
     admin_token: str = ""
+    create_rate_limit: int = 10
+    create_rate_window: int = 60
 
     model_config = SettingsConfigDict(env_file=".env")
 
