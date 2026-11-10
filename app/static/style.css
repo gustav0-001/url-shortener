@@ -26,4 +26,4 @@ input:focus-visible,button:focus-visible{outline:3px solid #111;outline-offset:3
 footer{margin-top:56px;border-top:3px solid #111;padding-top:16px;font-size:14px}
 .sr{position:absolute;left:-9999px}
 [hidden]{display:none!important}
-@media(max-width:640px){form{flex-direction:column}button{width:100%}.card{flex-direction:column;align-items:stretch}.list li{flex-wrap:wrap}}
+@media(max-width:640px){form{flex-direуction:column}button{width:100%}.card{flex-direction:column;align-items:stretch}.list li{flex-wrap:wrap}}
