@@ -1,12 +1,13 @@
+import logging
 import secrets
 import string
-import logging
+from datetime import datetime, timezone
 
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
-from app.models import Link
+from app.models import Link, get_current_time
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,9 @@ def generate_short_code() -> str:
             return code
 
 
-def create_link(session: Session, original_url: str) -> Link:
+def create_link(
+    session: Session, original_url: str, expires_at: datetime | None = None
+) -> Link:
     """
     Создание ссылки с проверкой повторной генерации short_code
     """
@@ -38,6 +41,7 @@ def create_link(session: Session, original_url: str) -> Link:
         link = Link(
             short_code=generate_short_code(),
             original_url=original_url,
+            expires_at=expires_at,
         )
         session.add(link)
 
@@ -72,3 +76,15 @@ def increment_clicks(session: Session, link_id: int) -> None:
         update(Link).where(Link.id == link_id).values(clicks=Link.clicks + 1)
     )
     session.commit()
+
+
+def is_expired(link: Link) -> bool:
+    """
+    Истёк ли срок жизни ссылки (ссылка без срока не истекает)
+    """
+    if link.expires_at is None:
+        return False
+    expires_at = link.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    return expires_at <= get_current_time()

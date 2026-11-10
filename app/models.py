@@ -17,3 +17,4 @@ class Link(SQLModel, table=True):
         default_factory=get_current_time,
         sa_type=DateTime(timezone=True),
     )
+    expires_at: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))
