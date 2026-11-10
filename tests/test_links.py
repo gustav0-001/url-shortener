@@ -43,7 +43,7 @@ def test_redirect(client):
 
     response = client.get(f"/{short_code}", follow_redirects=False)
 
-    assert response.status_code == 307
+    assert response.status_code == 302
     assert response.headers["location"] == "https://example.com/"
 
 def test_clicks_increment(client):
