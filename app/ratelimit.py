@@ -25,7 +25,7 @@ def reset() -> None:
 def client_ip(request: Request) -> str:
     """
     На Render клиентский IP приходит в True-Client-IP, его выставляет Cloudflare
-    X-Forwarded-For не используй, клиент может подделать его
+    X-Forwarded-For не используется, клиент может подделать его
     """
     return (
         request.headers.get("true-client-ip")
