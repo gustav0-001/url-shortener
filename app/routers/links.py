@@ -1,15 +1,15 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, col, select
 
 from app.database import get_session
-from app.models import Link
-from app.schemas import LinkCreate, LinkResponse
-from app.services import links as link_service
-
-from app.security import require_admin
+from app.models import Link, get_current_time
 from app.ratelimit import rate_limit_create
-
+from app.schemas import LinkCreate, LinkResponse
+from app.security import require_admin
+from app.services import links as link_service
 
 router = APIRouter(
     tags=["Links"],
@@ -23,13 +23,25 @@ def get_link_or_404(session: Session, short_code: str) -> Link:
     return link
 
 
-@router.post("/links", response_model=LinkResponse, status_code=201, dependencies=[Depends(rate_limit_create)])
+@router.post(
+    "/links",
+    response_model=LinkResponse,
+    status_code=201,
+    dependencies=[Depends(rate_limit_create)],
+)
 def create_link(payload: LinkCreate, session: Session = Depends(get_session)):
     """
     Создание ссылки с проверкой повторной генерации short_code
     """
+    expires_at = (
+        get_current_time() + timedelta(days=payload.expires_in_days)
+        if payload.expires_in_days
+        else None
+    )
     try:
-        return link_service.create_link(session, str(payload.original_url))
+        return link_service.create_link(
+            session, str(payload.original_url), expires_at
+        )
     except link_service.ShortCodeGenerationError:
         raise HTTPException(
             status_code=503,
@@ -37,7 +49,11 @@ def create_link(payload: LinkCreate, session: Session = Depends(get_session)):
         )
 
 
-@router.get("/links", response_model=list[LinkResponse], dependencies=[Depends(require_admin)])
+@router.get(
+    "/links",
+    response_model=list[LinkResponse],
+    dependencies=[Depends(require_admin)],
+)
 def get_links(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -58,11 +74,13 @@ def get_links(
 @router.get("/{short_code}")
 def redirect_link(short_code: str, session: Session = Depends(get_session)):
     link = get_link_or_404(session, short_code)
+    if link_service.is_expired(link):
+        raise HTTPException(status_code=410, detail="Link expired")
 
     target_url = link.original_url
     link_service.increment_clicks(session, link.id)
 
-    return RedirectResponse(target_url)
+    return RedirectResponse(target_url, status_code=302)
 
 
 @router.get("/links/{short_code}", response_model=LinkResponse)
@@ -73,7 +91,11 @@ def get_link(short_code: str, session: Session = Depends(get_session)):
     return get_link_or_404(session, short_code)
 
 
-@router.delete("/links/{short_code}", status_code=204, dependencies=[Depends(require_admin)])
+@router.delete(
+    "/links/{short_code}",
+    status_code=204,
+    dependencies=[Depends(require_admin)],
+)
 def delete_link(short_code: str, session: Session = Depends(get_session)):
     """
     Удалить ссылку (запись из БД) по short_code

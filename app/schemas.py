@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, HttpUrl, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, HttpUrl, computed_field, field_validator, Field
 from datetime import datetime
 from app.config import settings
 from urllib.parse import urlparse
@@ -8,6 +8,7 @@ class LinkCreate(BaseModel):
     Схема создания ссылки
     """
     original_url: HttpUrl
+    expires_in_days: int | None = Field(default=None, ge=1, le=365)
 
     @field_validator("original_url")
     @classmethod
@@ -29,6 +30,7 @@ class LinkResponse(BaseModel):
     original_url: str
     clicks: int
     created_at: datetime
+    expires_at: datetime | None = None
 
     @computed_field
     @property

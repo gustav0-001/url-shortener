@@ -31,4 +31,4 @@ def test_redirect_is_not_rate_limited(client, monkeypatch):
 
     for _ in range(3):
         response = client.get(f"/{short_code}", follow_redirects=False)
-        assert response.status_code == 307
+        assert response.status_code == 302
